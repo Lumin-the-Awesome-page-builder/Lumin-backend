@@ -27,7 +27,7 @@ jobs:
         run: npm run build
 
       - name: Run ESLint
-        run: npm run lint
+        run: npm run lint:check
 
       - name: Run Prettier
         run: npm run format
