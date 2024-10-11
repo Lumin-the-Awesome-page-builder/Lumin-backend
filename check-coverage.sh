@@ -11,7 +11,7 @@ lines_percentage=$(echo "$lines_pre_percentage" | sed 's/ //g')
 
 is_less_than_80() {
     local value=$1
-    if (( $(echo "$value < 1" | bc -l) )); then
+    if (( $(echo "$value < 80" | bc -l) )); then
         return 0
     else
         return 1
