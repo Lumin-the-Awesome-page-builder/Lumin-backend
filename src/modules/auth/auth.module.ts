@@ -7,8 +7,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtOptionsModule } from './service/jwt-options.module';
 import { BcryptUtil } from '../../utils/bcrypt.util';
 import { JwtUtil } from '../../utils/jwt.util';
-import { JwtStrategy } from "../../strategies/jwt.strategy";
-import { PassportModule } from "@nestjs/passport";
+import { JwtStrategy } from '../../strategies/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -19,12 +19,7 @@ import { PassportModule } from "@nestjs/passport";
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [
-    JwtStrategy,
-    BcryptUtil,
-    JwtUtil,
-    AuthService
-  ],
+  providers: [JwtStrategy, BcryptUtil, JwtUtil, AuthService],
   exports: [
     SequelizeModule.forFeature([UserModel]),
     PassportModule,
@@ -35,6 +30,6 @@ import { PassportModule } from "@nestjs/passport";
     JwtStrategy,
     BcryptUtil,
     JwtUtil,
-  ]
+  ],
 })
 export class AuthModule {}

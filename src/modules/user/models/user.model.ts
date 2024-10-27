@@ -1,4 +1,11 @@
-import { AutoIncrement, Column, DataType, Model, PrimaryKey, Table } from "sequelize-typescript";
+import {
+  AutoIncrement,
+  Column,
+  DataType,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
 
 // @ts-ignore
 @Table()
@@ -9,13 +16,13 @@ export class UserModel extends Model {
   id: number;
 
   @Column
-  login: string
+  login: string;
 
   @Column
-  hash: string
+  hash: string;
 
   @Column({
     type: DataType.BIGINT,
   })
-  lastLogin: number
+  lastLogin: number;
 }

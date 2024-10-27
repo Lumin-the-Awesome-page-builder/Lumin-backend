@@ -1,13 +1,10 @@
 import { JwtService } from '@nestjs/jwt';
 import { UserModel } from '../modules/user/models/user.model';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtUtil {
-  constructor(
-    private jwtService: JwtService,
-  ) {}
+  constructor(private jwtService: JwtService) {}
 
   public signUser(user: UserModel): string[] {
     const access = this.jwtService.sign(
@@ -19,11 +16,11 @@ export class JwtUtil {
     const refresh = this.jwtService.sign(
       {
         sub: user.id,
-        lastLogin: user.lastLogin
+        lastLogin: user.lastLogin,
       },
       { expiresIn: '30d' },
     );
 
-    return [access, refresh]
+    return [access, refresh];
   }
 }
