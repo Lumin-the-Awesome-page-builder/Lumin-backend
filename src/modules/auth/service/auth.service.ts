@@ -9,11 +9,14 @@ import { UserModel } from '../../user/models/user.model';
 import { BcryptUtil } from '../../../utils/bcrypt.util';
 import { JwtUtil } from '../../../utils/jwt.util';
 import AuthInputDto from '../dto/auth-input.dto';
+import YandexAuthInputDto from '../dto/yandex-auth-input.dto';
+import YandexAuthOutputDto from '../dto/yandex-auth-output.dto';
+import UserDto from '../../user/dto/user.dto';
+import axios from 'axios';
 
 @Injectable()
 export default class AuthService {
   user: UserModel;
-
   constructor(
     @Inject(BcryptUtil) private bcrypt: BcryptUtil,
     @Inject(JwtUtil) private jwt: JwtUtil,
@@ -43,6 +46,59 @@ export default class AuthService {
     };
   }
 
+  async authUserYandex(
+    yandexAuthInputDto: YandexAuthInputDto,
+  ): Promise<TokenPairDto> {
+    let result: YandexAuthOutputDto;
+    try {
+      await axios
+        .get('https://login.yandex.ru/info?format=json', {
+          headers: {
+            Authorization: `OAuth ${yandexAuthInputDto.token}`,
+          },
+        })
+        .then(function (response) {
+          result = new YandexAuthOutputDto(
+            response.data.id,
+            response.data.login,
+          );
+        });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
+      throw new ForbiddenException();
+    }
+    let curUser: UserDto;
+    try {
+      curUser = await UserModel.findOne({
+        where: {
+          internalServiceId: result.id,
+          serviceName: 'yandex',
+        },
+      }).then((res) => {
+        return new UserDto(res.id, res.login, res.lastLogin);
+      });
+
+      const tokens = this.jwt.signUser(curUser);
+      return {
+        accessToken: tokens[0],
+        refreshToken: tokens[1],
+      };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
+      curUser = await UserModel.create({
+        login: result.login,
+        hash: null,
+        serviceName: 'yandex',
+        internalServiceId: result.id,
+      });
+
+      const tokens = this.jwt.signUser(curUser);
+      return {
+        accessToken: tokens[0],
+        refreshToken: tokens[1],
+      };
+    }
+  }
   async refresh(onRefresh: {
     id: number;
     lastLogin: number;

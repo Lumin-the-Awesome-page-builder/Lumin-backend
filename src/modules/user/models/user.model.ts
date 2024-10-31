@@ -2,6 +2,7 @@ import {
   AutoIncrement,
   Column,
   DataType,
+  Default,
   Model,
   PrimaryKey,
   Table,
@@ -25,4 +26,12 @@ export class UserModel extends Model {
     type: DataType.BIGINT,
   })
   lastLogin: number;
+
+  @Default('common')
+  @Column
+  serviceName!: string;
+
+  @Default(0)
+  @Column
+  internalServiceId!: number;
 }
