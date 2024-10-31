@@ -11,6 +11,7 @@ import AuthInputDto from '../dto/auth-input.dto';
 import AuthService from '../service/auth.service';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '../../../guards/jwt-refresh.guard';
+import YandexAuthInputDto from '../dto/yandex-auth-input.dto';
 
 @Controller('auth')
 export default class AuthController {
@@ -38,5 +39,10 @@ export default class AuthController {
     @Req() req: { user: { id: number; lastLogin: number } },
   ) {
     return await this.authService.refresh(req.user);
+  }
+  @Post('/yandex')
+  @HttpCode(200)
+  public async yandex(@Body() credentials: YandexAuthInputDto) {
+    return await this.authService.authUserYandex(credentials);
   }
 }

@@ -13,7 +13,10 @@ import appConf from '../../../conf/app.conf';
 import dbConf from '../../../conf/db.conf';
 import { ForbiddenException } from '@nestjs/common';
 import AuthInputDto from '../dto/auth-input.dto';
+import YandexAuthInputDto from '../dto/yandex-auth-input.dto';
+import axios from 'axios';
 
+jest.mock('axios');
 jest.mock('../../user/models/user.model', () => {
   return {
     UserModel: {
@@ -128,5 +131,47 @@ describe('AuthService tests', () => {
     //@ts-ignore
     expect(service.jwt.signUser).toBeCalledTimes(1);
     expect(res).toStrictEqual({ accessToken: '1', refreshToken: '2' });
+  });
+
+  describe('Yandex Auth tests', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('Test login with wrong Yandex token', async () => {
+      jest.restoreAllMocks();
+      const token = 'wrong_token';
+      await expect(
+        service.authUserYandex(new YandexAuthInputDto(token)),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('Test login with correct Yandex token', async () => {
+      jest.restoreAllMocks();
+
+      //@ts-ignore
+      service.jwt.signUser = jest.fn(() => ['1', '2']);
+      const token = 'valid_token';
+      const expectedResponse = {
+        id: 'user-id',
+        login: 'user-login',
+      };
+      (axios.get as jest.Mock).mockResolvedValue({ data: expectedResponse });
+      await service.authUserYandex(new YandexAuthInputDto(token));
+      expect(UserModel.findOne).toBeCalledWith({
+        where: {
+          internalServiceId: expectedResponse.id,
+          serviceName: 'yandex',
+        },
+      });
+      expect(UserModel.create).toBeCalledWith({
+        hash: null,
+        internalServiceId: expectedResponse.id,
+        login: expectedResponse.login,
+        serviceName: 'yandex',
+      });
+      //@ts-ignore
+      expect(service.jwt.signUser).toBeCalledTimes(1);
+    });
   });
 });
