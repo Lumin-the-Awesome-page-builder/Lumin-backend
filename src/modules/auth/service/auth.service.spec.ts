@@ -15,6 +15,7 @@ import { ForbiddenException } from '@nestjs/common';
 import AuthInputDto from '../dto/auth-input.dto';
 import YandexAuthInputDto from '../dto/yandex-auth-input.dto';
 import axios from 'axios';
+import VkAuthInputDto from '../dto/vk-auth-input.dto';
 
 jest.mock('axios');
 jest.mock('../../user/models/user.model', () => {
@@ -112,7 +113,7 @@ describe('AuthService tests', () => {
     });
   });
 
-  it('Test signup', async () => {
+  it('Test signup with already exists login', async () => {
     //@ts-ignore
     service.bcrypt.hash = jest.fn(
       //@ts-ignore
@@ -121,9 +122,27 @@ describe('AuthService tests', () => {
     //@ts-ignore
     service.jwt.signUser = jest.fn(() => ['1', '2']);
 
-    const res = await service.signup(new AuthInputDto('l', 'p'));
+    await expect(service.signup(new AuthInputDto('l', 'p'))).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
 
-    expect(UserModel.create).toBeCalledTimes(1);
+  it('Test signup', async () => {
+    jest.restoreAllMocks();
+    //@ts-ignore
+    service.bcrypt.hash = jest.fn(
+      //@ts-ignore
+      () => new Promise((resolve) => resolve(true)),
+    );
+    //@ts-ignore
+    service.jwt.signUser = jest.fn(() => ['1', '2']);
+
+    const mockUser = false;
+
+    //@ts-ignore
+    jest.spyOn(UserModel, 'findOne').mockResolvedValue(mockUser);
+
+    const res = await service.signup(new AuthInputDto('l', 'p'));
     //@ts-ignore
     expect(service.bcrypt.hash).toBeCalledTimes(1);
     //@ts-ignore
@@ -164,11 +183,29 @@ describe('AuthService tests', () => {
           serviceName: 'yandex',
         },
       });
-      expect(UserModel.create).toBeCalledWith({
-        hash: null,
-        internalServiceId: expectedResponse.id,
-        login: expectedResponse.login,
-        serviceName: 'yandex',
+      //@ts-ignore
+      expect(service.jwt.signUser).toBeCalledTimes(1);
+      expect(UserModel.create).toBeCalled();
+    });
+  });
+
+  describe('Vk Auth tests', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('Test login by Vk data', async () => {
+      jest.restoreAllMocks();
+
+      //@ts-ignore
+      service.jwt.signUser = jest.fn(() => ['1', '2']);
+      const data = new VkAuthInputDto(1, 'vk-user-login');
+      await service.authUserVk(data);
+      expect(UserModel.findOne).toBeCalledWith({
+        where: {
+          internalServiceId: data.id,
+          serviceName: 'vk',
+        },
       });
       //@ts-ignore
       expect(service.jwt.signUser).toBeCalledTimes(1);

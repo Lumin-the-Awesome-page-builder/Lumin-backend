@@ -13,6 +13,7 @@ import YandexAuthInputDto from '../dto/yandex-auth-input.dto';
 import YandexAuthOutputDto from '../dto/yandex-auth-output.dto';
 import UserDto from '../../user/dto/user.dto';
 import axios from 'axios';
+import VkAuthInputDto from '../dto/vk-auth-input.dto';
 
 @Injectable()
 export default class AuthService {
@@ -67,12 +68,23 @@ export default class AuthService {
     } catch (_) {
       throw new ForbiddenException();
     }
+    return await this.authOrSignByService(result, 'yandex');
+  }
+
+  async authUserVk(vkAuthInputDto: VkAuthInputDto): Promise<TokenPairDto> {
+    return await this.authOrSignByService(vkAuthInputDto, 'vk');
+  }
+
+  private async authOrSignByService(
+    data: YandexAuthOutputDto | VkAuthInputDto,
+    serviceName: string,
+  ) {
     let curUser: UserDto;
     try {
       curUser = await UserModel.findOne({
         where: {
-          internalServiceId: result.id,
-          serviceName: 'yandex',
+          internalServiceId: data.id,
+          serviceName: serviceName,
         },
       }).then((res) => {
         return new UserDto(res.id, res.login, res.lastLogin);
@@ -86,10 +98,11 @@ export default class AuthService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {
       curUser = await UserModel.create({
-        login: result.login,
+        login: data.login,
         hash: null,
-        serviceName: 'yandex',
-        internalServiceId: result.id,
+        serviceName: serviceName,
+        internalServiceId: data.id,
+        lastLogin: Date.now(),
       });
 
       const tokens = this.jwt.signUser(curUser);
@@ -99,6 +112,7 @@ export default class AuthService {
       };
     }
   }
+
   async refresh(onRefresh: {
     id: number;
     lastLogin: number;
@@ -120,20 +134,28 @@ export default class AuthService {
   }
 
   async signup(credentials: AuthInputDto): Promise<TokenPairDto> {
-    const user = await UserModel.create({
-      ...credentials,
-      hash: await this.bcrypt.hash(credentials.password),
-      lastLogin: Date.now(),
-    });
-
+    let user: UserModel;
+    user = await UserModel.findOne({ where: { login: credentials.login } });
     if (!user) {
-      throw new BadRequestException();
-    }
+      user = await UserModel.create({
+        ...credentials,
+        hash: await this.bcrypt.hash(credentials.password),
+        lastLogin: Date.now(),
+      });
 
-    const tokens = this.jwt.signUser(user);
-    return {
-      accessToken: tokens[0],
-      refreshToken: tokens[1],
-    };
+      if (!user) {
+        throw new BadRequestException();
+      }
+
+      const tokens = this.jwt.signUser(user);
+      return {
+        accessToken: tokens[0],
+        refreshToken: tokens[1],
+      };
+    } else {
+      throw new ForbiddenException(
+        'User with this name is already registered in the system',
+      );
+    }
   }
 }

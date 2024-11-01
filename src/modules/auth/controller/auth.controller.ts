@@ -12,6 +12,7 @@ import AuthService from '../service/auth.service';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '../../../guards/jwt-refresh.guard';
 import YandexAuthInputDto from '../dto/yandex-auth-input.dto';
+import VkAuthInputDto from '../dto/vk-auth-input.dto';
 
 @Controller('auth')
 export default class AuthController {
@@ -44,5 +45,11 @@ export default class AuthController {
   @HttpCode(200)
   public async yandex(@Body() credentials: YandexAuthInputDto) {
     return await this.authService.authUserYandex(credentials);
+  }
+
+  @Post('/vk')
+  @HttpCode(200)
+  public async vk(@Body() credentials: VkAuthInputDto) {
+    return await this.authService.authUserVk(credentials);
   }
 }
