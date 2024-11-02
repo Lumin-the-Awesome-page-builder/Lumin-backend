@@ -23,15 +23,32 @@ export class UserModel extends Model {
   hash: string;
 
   @Column({
+    field: 'lastlogin',
     type: DataType.BIGINT,
   })
   lastLogin: number;
 
   @Default('common')
-  @Column
+  @Column({
+    field: 'servicename',
+  })
   serviceName!: string;
 
   @Default(0)
-  @Column
+  @Column({
+    field: 'internalserviceid',
+  })
   internalServiceId!: number;
+
+  @Column({
+    field: 'createdat',
+    type: DataType.DATE,
+  })
+  createdAt?: Date | any;
+
+  @Column({
+    field: 'updatedat',
+    type: DataType.DATE,
+  })
+  updatedAt?: Date | any;
 }
