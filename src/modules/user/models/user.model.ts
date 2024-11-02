@@ -41,13 +41,13 @@ export class UserModel extends Model {
   internalServiceId!: number;
 
   @Column({
-    field: "createdat",
+    field: 'createdat',
     type: DataType.DATE,
   })
   createdAt?: Date | any;
 
   @Column({
-    field: "updatedat",
+    field: 'updatedat',
     type: DataType.DATE,
   })
   updatedAt?: Date | any;
