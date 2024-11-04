@@ -79,6 +79,7 @@ export default class AuthService {
     data: YandexAuthOutputDto | VkAuthInputDto,
     serviceName: string,
   ) {
+    console.log(data.login, data.id);
     let curUser: UserDto;
     try {
       curUser = await UserModel.findOne({
