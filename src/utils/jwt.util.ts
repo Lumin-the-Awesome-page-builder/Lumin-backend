@@ -2,6 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserModel } from '../modules/user/models/user.model';
 import { Injectable } from '@nestjs/common';
 import UserDto from '../modules/user/dto/user.dto';
+import { jwtConf } from "../conf/jwt.conf";
 
 @Injectable()
 export class JwtUtil {
@@ -12,14 +13,14 @@ export class JwtUtil {
       {
         sub: user.id,
       },
-      { expiresIn: '2m' },
+      { expiresIn: jwtConf.jwtAccessLifetime },
     );
     const refresh = this.jwtService.sign(
       {
         sub: user.id,
         lastLogin: user.lastLogin,
       },
-      { expiresIn: '30d' },
+      { expiresIn: jwtConf.jwtRefreshLifetime },
     );
 
     return [access, refresh];
