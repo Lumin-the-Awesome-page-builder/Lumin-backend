@@ -10,7 +10,7 @@ import UserController from '../modules/user/controller/user.controller';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { BcryptUtil } from './bcrypt.util';
 import UserService from '../modules/user/service/user.service';
-import { jwtConf } from "../conf/jwt.conf";
+import { jwtConf } from '../conf/jwt.conf';
 
 describe('JwtUtil', () => {
   let jwtUtil: JwtUtil;

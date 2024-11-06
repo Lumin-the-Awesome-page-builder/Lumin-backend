@@ -1,4 +1,4 @@
 export const jwtConf = {
-  jwtAccessLifetime: "2m",
-  jwtRefreshLifetime: "30d"
-}
+  jwtAccessLifetime: '2m',
+  jwtRefreshLifetime: '30d',
+};

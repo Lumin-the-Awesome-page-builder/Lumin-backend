@@ -2,7 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserModel } from '../modules/user/models/user.model';
 import { Injectable } from '@nestjs/common';
 import UserDto from '../modules/user/dto/user.dto';
-import { jwtConf } from "../conf/jwt.conf";
+import { jwtConf } from '../conf/jwt.conf';
 
 @Injectable()
 export class JwtUtil {
