@@ -10,6 +10,7 @@ import UserController from '../modules/user/controller/user.controller';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { BcryptUtil } from './bcrypt.util';
 import UserService from '../modules/user/service/user.service';
+import { jwtConf } from '../conf/jwt.conf';
 
 describe('JwtUtil', () => {
   let jwtUtil: JwtUtil;
@@ -50,12 +51,12 @@ describe('JwtUtil', () => {
     //@ts-ignore
     expect(jwtUtil.jwtService.sign).toBeCalledWith(
       { sub: 123, lastLogin: 123 },
-      { expiresIn: '30d' },
+      { expiresIn: jwtConf.jwtRefreshLifetime },
     );
     //@ts-ignore
     expect(jwtUtil.jwtService.sign).toBeCalledWith(
       { sub: 123 },
-      { expiresIn: '2m' },
+      { expiresIn: jwtConf.jwtAccessLifetime },
     );
     expect(res).toStrictEqual(['signed', 'signed']);
   });
