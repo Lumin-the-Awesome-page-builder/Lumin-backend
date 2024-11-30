@@ -14,6 +14,9 @@ import YandexAuthOutputDto from '../dto/yandex-auth-output.dto';
 import UserDto from '../../user/dto/user.dto';
 import axios from 'axios';
 import VkAuthInputDto from '../dto/vk-auth-input.dto';
+import ExceptionReportDto from '../dto/exception-report-dto';
+import { ReportModel } from '../models/ReportModel';
+import ExceptionResponseDto from '../dto/exception-response-dto';
 
 @Injectable()
 export default class AuthService {
@@ -157,5 +160,23 @@ export default class AuthService {
         'User with this name is already registered in the system',
       );
     }
+  }
+
+  // @ts-ignore
+  async report(credentials: ExceptionReportDto): Promise<ExceptionResponseDto> {
+    console.log(credentials.url.length);
+    console.log(credentials.errorCode.length);
+    console.log(credentials.message.length);
+    console.log(credentials.userAgent.length);
+    console.log(credentials.stack.length);
+    const report = await ReportModel.create({
+      ...credentials,
+    });
+    if (!report) {
+      throw new BadRequestException();
+    }
+    return {
+      message: 'Ваш отчет успешно записан',
+    };
   }
 }

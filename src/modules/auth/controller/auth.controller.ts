@@ -13,10 +13,17 @@ import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '../../../guards/jwt-refresh.guard';
 import YandexAuthInputDto from '../dto/yandex-auth-input.dto';
 import VkAuthInputDto from '../dto/vk-auth-input.dto';
+import ExceptionReportDto from '../dto/exception-report-dto';
 
 @Controller('auth')
 export default class AuthController {
   constructor(@Inject() private authService: AuthService) {}
+
+  @Post('/report')
+  @HttpCode(200)
+  public async report(@Body() credentials: ExceptionReportDto) {
+    return await this.authService.report(credentials);
+  }
 
   @Post('/')
   @HttpCode(200)
